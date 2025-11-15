@@ -1,10 +1,18 @@
 const redis = require("../config/redis");
 const eventModel = require("../models/eventModel");
+const connectToMongoDB = require("../config/mongoDb");
 
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/analytics-events';
+
+connectToMongoDB(MONGO_URL)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
+  let shuttingDown = false;
 async function saveEvent() {
   console.log("Processing event data by worker thread");
 
-  while (true) {
+  while (!shuttingDown) {
     try {
       const data = await redis.blpop("event_logs", 0);
 
@@ -39,6 +47,7 @@ saveEvent();
 
 process.on("SIGINT", async () => {
   console.log("Shutting down worker thread...");
+  shuttingDown = true;
   try {
     await redis.quit();
   } catch (e) {}
