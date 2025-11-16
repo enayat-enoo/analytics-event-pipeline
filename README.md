@@ -66,7 +66,7 @@ npm start
 ```
 **step 5**: Start the Worker thread
 ```
-cd /service/
+cd .\service\
 node service.js
 ```
 
